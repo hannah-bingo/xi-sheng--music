@@ -1,32 +1,56 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <el-container id="app" class="container">
+    <el-header height="80px"><my-header></my-header></el-header>
+    <el-main>
+      <div class="layout">
+        <router-view></router-view>
+      </div>
+      <my-footer></my-footer>
+      <!-- <my-banner></my-banner> -->
+      <el-backtop target=".el-main" :bottom="backBottom">
+        <img src="./assets/img/goTop.png" alt="">
+      </el-backtop>
+    </el-main>
+    <Login v-if="loginDialogVisible"></Login>
+    <play-bar v-show="isShowPlayBar"></play-bar>
+  </el-container>
 </template>
+<script>
+import myHeader from '@/components/common/Header.vue'
+import myFooter from '@/components/common/Footer.vue'
+import PlayBar from '@/components/common/Play-bar.vue'
+import Login from '@/components/common/Login.vue'
+import { mapGetters } from 'vuex'
+export default {
+  name: 'app',
+  components: {
+    myHeader,
+    myFooter,
+    Login,
+    PlayBar
+  },
+  data () {
+    return {
+      backBottom: 80
+    }
+  },
+  // 监听属性 类似于data概念
+  computed: {
+    ...mapGetters(['isLogin', 'userInfo', 'loginDialogVisible']),
+    isShowPlayBar () {
+      return this.$route.path !== '/mv' && this.$route.path !== '/video'
+    }
+  },
+  methods: {
+  }
+}
+</script>
 
 <style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+.container {
+  height: 100%;
 }
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+.layout {
+  min-height: calc(100vh - 80px - 40px)
 }
 </style>

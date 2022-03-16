@@ -1,5 +1,6 @@
 module.exports = {
-  presets: [
-    '@vue/cli-plugin-babel/preset'
-  ]
+    // publicPath: "/XS_music/",
+    presets: [
+        '@vue/cli-plugin-babel/preset'
+    ]
 }
