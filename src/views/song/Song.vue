@@ -64,11 +64,16 @@
           </p>
           <!-- 播放歌曲改行样式 -->
           <div class="song-oper">
+            <!-- 歌曲标题 -->
             <span :class="['play-btn',songDisable]" @click="playing(info)">
               <i :class="['iconfont', playFontIcon]"></i>
               {{info.vip ? 'VIP尊享' : '立即播放'}}
             </span>
           </div>
+          <div class="song-lyric">
+            <Lyrics :sId="sId" local="page" :currentTime="currentTime"></Lyrics>
+          </div>
+          <div style="height:300px;"></div>
         </div>
       </div>
     </div>
@@ -77,9 +82,10 @@
 <script>
 import { formatSongInfo } from '@/utils/song'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import Lyrics from '@components/common/Play-bar-Lyrics.vue'
 export default {
   components: {
-
+    Lyrics
   },
   created () {
 
@@ -88,12 +94,18 @@ export default {
     return {
       info: null,
       sId: '0',
-      simiSong: []
+      simiSong: [],
+      currentTime: 0
     }
   },
   mounted () {
     this.sId =  String(this.$route.query.id)
-    // console.log(this.sId);
+    // console.log('我是Song组件，收到currentTime');
+    this.$bus.$on('currTime',(data) => {
+      // console.log('我是Song组件，收到currentTime', data);
+      this.currentTime = data
+    })
+    // console.log(this.sId+'96');
     this.init()
     window.addEventListener('scroll', this.handleScroll, true)
   },
@@ -172,10 +184,10 @@ export default {
       if (res.code !== 200) {
         return this.$msg.error('数据请求失败');
       }
-      // console.log(res);
+      console.log(res);
       this.simiSong = res.songs.map(item => {
-        // console.log(item.id);
-        // console.log(String(item.id));
+      
+        console.log(String(item.id));
         return {
           id: String(item.id),
           name: item.name,
@@ -185,6 +197,7 @@ export default {
           alia: item.alias,
           duration: this.$utils.formatSongTime(item.duration),
           url: `https://music.163.com/song/media/outer/url?id=${item.id}.mp3`,
+          // url:item.mp3Url,
           vip: item.fee === 1,
           license: item.license,
           publishTime: item.publishTime
@@ -205,6 +218,7 @@ export default {
     $route: {
       handler () {
         this.sId = this.$route.query.id
+        console.log(this.sId+'208');
         this.init()
       },
       // 深度监听，常用于对象下面的属性变化
@@ -328,7 +342,7 @@ export default {
 
         .audio-icon {
             display: inline-flex;
-        }
+                  }
     }
     // 作曲者
     .song-author {
@@ -336,6 +350,10 @@ export default {
       font-size: 18px;
       color: #666;
       line-height: 18px;
+    }
+    .song-lyric {
+    margin: 30px 0 10px;
+    overflow-y: auto;
     }
     .song-info {
       padding: 20px 0;
@@ -355,6 +373,7 @@ export default {
           font-style: normal;
       }
     }
+
     .song-oper {
       .play-btn {
         display: inline-block;
@@ -373,5 +392,19 @@ export default {
       }
     }
   }
+
+  
+@keyframes soundPaying {
+    from {
+        -webkit-transform: rotate(10deg);
+        transform: rotate(10deg)
+    }
+
+    to {
+        -webkit-transform: rotate(370deg);
+        transform: rotate(370deg)
+    }
+}
+
 }
 </style>

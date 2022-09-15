@@ -157,6 +157,8 @@ export default {
           // console.log(res);
           // songList[0] = 赋一个列表
           this.$set(this.songList, item.id, res.playlist.tracks.splice(0, 6))
+          // 思路如下，但是页面不显示
+          // this.songList[item.id]  = res.playlist.tracks.splice(0,6)
         })
       })
       // const { data: res } = await this.$http.toplist()

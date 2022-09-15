@@ -13,15 +13,15 @@ const findIndex = (list, playList) => {
     return playList.findIndex(d => { return d.id === list.id })
 }
 export default {
-    //   loginSuc (context, val) {
-    //     context.commit('setLoginDialog', val)
-    //   },
-    //   // 播放歌曲列表里全部歌曲（清空当前播放列表）
-    //   playAll ({ commit }, { list }) {
-    //     commit(types.SET_PLAYSLIST, concatPlayList(list))
-    //     commit(types.SET_PLAYSTATUS, true)
-    //     commit(types.SET_PLSYSINDEX, 0)
-    //   },
+    loginSuc(context, val) {
+        context.commit('setLoginDialog', val)
+    },
+    // 播放歌曲列表里全部歌曲（清空当前播放列表）
+    playAll({ commit }, { list }) {
+        commit(types.SET_PLAYLIST, concatPlayList(list))
+        commit(types.SET_PLAYSTATUS, true)
+        commit(types.SET_PLAYINDEX, 0)
+    },
     // 播放当前选中的歌曲
     selectPlay({ commit, state }, { list }) {
         // console.log(list);
@@ -31,9 +31,9 @@ export default {
         commit(types.SET_PLAYSTATUS, true)
         commit(types.SET_PLAYINDEX, findIndex(list[0], playList))
     },
-    //   // 添加歌曲到当前播放列表
-    //   addList ({ commit, state }, { list }) {
-    //     const playList = concatPlayList(list, state.playList)
-    //     commit(types.SET_PLAYLIST, playList)
-    //   }
+    // 添加歌曲到当前播放列表
+    addList({ commit, state }, { list }) {
+        const playList = concatPlayList(list, state.playList)
+        commit(types.SET_PLAYLIST, playList)
+    }
 }

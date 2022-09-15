@@ -5,29 +5,20 @@ import store from './store'
 import less from 'less'
 import * as getApi from './apis/http'
 import utils from './utils/utils'
-// import {
-//   Swiper as SwiperClass,
-//   Pagination,
-//   Mousewheel,
-//   Autoplay
-// } from 'swiper/core'
-// import infiniteScroll from 'vue-infinite-scroll'
-// import getAwesomeSwiper from 'vue-awesome-swiper/dist/exporter'
+
 
 import './assets/css/global.css'
 import './assets/fonts/font.css'
-// import 'swiper/swiper-bundle.css'
 import './plugins/elements.js'
 import './assets/less/reset.less'
 import './assets/less/common.less'
 
 import './utils/directive'
 
-// SwiperClass.use([Pagination, Mousewheel, Autoplay])
+
 
 Vue.use(less)
-    // Vue.use(infiniteScroll)
-    // Vue.use(getAwesomeSwiper(SwiperClass))
+
 
 Vue.config.productionTip = false
 Vue.prototype.$http = getApi
@@ -36,5 +27,8 @@ Vue.prototype.$utils = utils
 new Vue({
     router,
     store,
-    render: h => h(App)
+    render: h => h(App),
+    beforeCreate() {
+        Vue.prototype.$bus = this // 安装全局事件总线
+    }
 }).$mount('#app')

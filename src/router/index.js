@@ -6,31 +6,17 @@ Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
-        redirect: '/Index'
+        redirect: '/index'
     }, {
         path: '/index',
         name: 'Index',
         component: resolve => { require(['@/views/index/Index.vue'], resolve) }
     }, {
-        path: '/rank',
-        name: 'Rank',
-        component: resolve => { require(['@/views/rank/Rank.vue'], resolve) }
-    }, {
         path: '/playlist',
         name: 'Playlist',
-        component: resolve => { require(['@/views/playlist/Playlist.vue'], resolve) },
-        children: [{
-            path: '/playlist/Detail',
-            name: 'PlaylistDetail',
-            component: () =>
-                import ('@/views/playlist/Detail.vue')
-        }]
+        component: resolve => { require(['@/views/playlist/Detail.vue'], resolve) }
     },
-    {
-        path: '/mvlist',
-        name: 'MVlist',
-        component: resolve => { require(['@/views/mvlist/MVlist.vue'], resolve) }
-    },
+
     {
         path: '/artist',
         name: 'Artist',

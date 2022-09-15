@@ -1,80 +1,255 @@
 <template>
-<div class="songs-list-main">
-  
-  <!-- <div class="list-header flex">
-    <div class="columnIndex">序号</div>
-    <div class="columnSong">歌曲</div>
-    <div class="columnSinger">歌手</div>
-    <div class="columnAlbum" v-if="typeSize !== 'mini'">专辑</div>
-    <div class="columnTime">时长</div>
-  </div> -->
-  <!-- <div class="list-scroll" :style="{height: height + 'px'}" ref="curSongRef">
-    <div class="list-main" :style="curSongSty">
-      <div :class="isCurSong(item, index)" v-for="(item, index) in list" :key="item.id" @click.stop="tips($event, item)">
-        <div class="columnIndex">
-          <span class="songlist-index">{{ indexMethod(index) }}</span>
-          <div class="audio-icon">
-            <div class="column"></div>
-            <div class="column" style="animation-delay: -1.5s;"></div>
-            <div class="column" style="animation-delay: -0.9s;"></div>
-            <div class="column" style="animation-delay: -0.6s;"></div>
-            <div class="column" style="animation-delay: -1.2s;"></div>
+  <div class="songs-list-main">
+    <div class="list-header flex">
+      <div class="columnIndex">序号</div>
+      <div class="columnSong">歌曲</div>
+      <div class="columnSinger">歌手</div>
+      <div class="columnAlbum" v-if="typeSize !== 'mini'">专辑</div>
+      <div class="columnTime">时长</div>
+    </div>
+    <div class="list-scroll" :style="{height: height + 'px'}" ref="curSongRef">
+      <div class="list-main" :style="curSongSty">
+        <div :class="isCurSong(item,index)" v-for="(item, index) in list" :key="item.id" @click.stop="tips($event, item)">
+        <!-- <div> -->
+          <!-- 序号+播放+正在播放切换 -->
+          <div class="columnIndex">
+            <span class="songlist-index">{{indexMethod(index)}}</span>
+            <div class="audio-icon">
+              <div class="column" style="animation-delay: -1.2s;"></div>
+              <div class="column"></div>
+              <div class="column" style="animation-delay: -1.5s;"></div>
+              <div class="column" style="animation-delay: -0.9s;"></div>
+              <div class="column" style="animation-delay: -0.6s;"></div>
+            </div>
+            <i :class="playIcon(item)" @click="currentSong(item)"></i>
+          </div>
+          <!-- 歌曲 -->
+          <div class="columnSong songlist-name">
+            <router-link :class="typeSize" :to="{path: '/song',query: {id: item.id}}">
+               {{item.name}}
+            </router-link>
+            <template>
+              <router-link class="mv-name" :to="{ path: '/mv', query: { id: item.mvId }}" v-if="item.mvId">
+                <i class="iconfont icon-video"></i>
+              </router-link>
+              <i v-if="item.vip" class="iconfont icon-vip"></i>
+            </template>
+          </div>
+          <!-- 歌手 -->
+          <div class="columnSinger songlist-singer">
+            <!-- 返回的数据里用户的uid有可能为0 -->
+            <router-link :to="{path: '/singer',query: { Id: author.id }}" class="song_name" v-for="(author, k) in item.singer" :key="author.name">
+               {{ k !== 0 ? '/' + author.name : author.name}}
+            </router-link>
+          </div>
+          <!-- 专辑 -->
+          <div class="columnAlbum" v-if="typeSize !== 'mini'">
+              <router-link class="songlist-album" :to="{ path: '/album', query: { id: item.album.id }}" v-if="item.album">{{ item.album.name }}</router-link>
+          </div>
+          <!-- 时长 + 收藏喜欢删除  -->
+          <div class="columnTime">
+            <div class="songlist-time">{{item.duration}}</div>
+            <div class="songlist-oper">
+                <i class="iconfont icon-add" title="添加到列表" v-if="typeSize !== 'mini'"></i>
+                <el-popover placement="bottom" trigger="click" ref="popAddList">
+                    <i class="iconfont icon-add-list" title="添加到歌单" slot="reference" @click="closeAddListPop"></i>
+                </el-popover>
+                <i class="iconfont icon-collect" @click="likeSong(item)"></i>
+                <i class="iconfont icon-del" title="删除" v-if="typeSize === 'mini'" @click.stop="delList(index)"></i>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div> -->
-  <div class="pagination"></div>
-</div>
+    <div class="pagination" v-if="isShowPagination">
+        <el-pagination
+                background
+                @current-change="currentChange"
+                :page-size="this.pageSize"
+                :current-page.sync="currentPage"
+                layout="prev, pager, next"
+                :total="this.songList.length">
+            </el-pagination>
+    </div>
+  </div>
 </template>
 
 <script>
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 export default {
-  name: 'SongList',
+  name: 'PlayBarSongList',
   components: {
 
+  },
+  data() {
+      return {
+        curScroll: -1 || 1,
+        // 分页当前所处页面
+        currentPage: 1,
+        // 一页数据
+        pageSize: 30,
+        playing: false,
+        timer: null,
+      }
   },
   props: {
     songList: {
       type: Array,
       required: true
     },
-    typeSize: {  // 播放列表展示类型， 默认normal是歌单下的展示列表，mini是播放条下的歌曲列表的
+    typeSize: {   // 播放列表展示类型,默认normal是歌单下的展示列表,mini是播条下的歌曲列表
       type: String,
       default: 'normal'
     },
-    stripe: {  // 隔行变色
+    height: {
+      type: [Number, String],
+      default: false
+    },
+    // 隔行变色
+    stripe: {
       type: Boolean,
       default: false
     },
-    offset: {
-      type: Number,
-      default: 0
-    },
-    height: {
-      type: [Number, String],
-      default: 'auto'
-    },
     // 分页加载 || 无限滚动加载
     isScroll: {
-      type: Boolean,
-      default: true
-    }
+        type: Boolean,
+        default: false
+    },
+    isShowTips: {
+        type: Boolean,
+        default: true 
+    },
+    offset: { // 若是列表有分页，偏移数量
+            type: Number,
+            default: 0
+        },
   },
-  data () {
-    return {
-      pageSize: 30,
-      currentPage: 1,
-      playing: false,
-      timer: null,
-      curScroll: -1 || 1
-    }
+  mounted() {
+    this.scrollCurSong(this.curSongInfo)
   },
   computed: {
-    curSongSty () {
+    ...mapGetters(['playList','playIndex','isPlayed']),
+    curSongSty() {
       return `transform: translateY(${this.curScroll}px)`
+    },
+    isCurSong () {
+        const self = this
+        return (item, index) => {
+            return ['list-item', self.stripe ? (index % 2 === 0 ? 'stripe' : '') : '', self.isPlayed && (item.id === self.curSongInfo.id) ? 'active' : '', (item.license || item.vip) ? 'disable' : '', item.vip ? 'vip' : '']
+        }
+    },
+    list() {
+      if(!this.isScroll) {  // 分页加载数据
+        return  this.songList.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize)
+      } else {
+        return this.songList
+      }
+    },
+    // 播放按钮 与 暂停按钮切换
+    playIcon() {
+        const self = this
+        return (item) => {
+            return ['iconfont','playicon', this.isPlayed && (item.id === self.curSongInfo.id) ? 'icon-pause' : 'icon-play']
+        }
+    },
+    curSongInfo () {
+        return this.playList[this.playIndex]
+    },
+     // 是否展示分页
+     isShowPagination () {
+        return this.songList.length > this.pageSize && !this.isScroll 
+    },
+  },
+  methods: {
+    ...mapActions(['selectPlay', 'addList']),
+    ...mapMutations({
+        setPlayStatus: 'SET_PLAYSTATUS',
+        setPlayList: 'SET_PLAYLIST',
+        setPlayListTips: 'setPlayListTips',
+        setPlayIndex: 'SET_PLAYINDEX'
+    }),
+    // 表格列表序号格式化
+    indexMethod (page) {
+        if (!this.isScroll) {
+            return (this.currentPage - 1) * this.pageSize + page + 1 + this.offset
+        } else {
+            return page + 1
+        }
+    },
+    // 全局设置当前播放歌曲
+    currentSong (item) {
+        // 若当前歌曲 或者 当前播放歌曲不是本歌单 显示的歌曲 立即播放当前歌单
+        if (!this.curSongInfo || item.id !== this.curSongInfo.id) {
+            this.selectPlay({ list: [item] })
+            if (this.isShowTips) {
+                this.setPlayListTips({ flag: true, txt: '已开始播放' })
+                clearTimeout(this.timer)
+                this.timer = setTimeout(() => {
+                    this.setPlayListTips({ flag: false, txt: '已开始播放 ' })
+                }, 2000)
+            }
+        } else {
+            this.setPlayStatus(!this.isPlayed)
+        }
+    },
+    // 喜欢该歌曲
+    async likeSong(item) {
+        const { data: res } = await this.$http.likeSong({ id: item.id, like: !item.like })
+        if (res.code !== 200) {
+            return this.$msg.error('数据请求失败')
+        }
+        this.$msg.success('收藏成功')
+    },
+    // 在播放列表中删除当前歌曲 
+    delList (index) {
+        this.playList.splice(index, 1) 
+        this.setPlayList(this.playList)
+    },
+    closeAddListPop() {
+        this.$refs.popAddList.forEach(item => {
+            item.doClose()
+        }) 
+    },
+    // 歌曲列表分页功能
+    currentChange (page) {
+        this.currentPage = page
+    },
+   
+    // 验证会员等是否可以播放
+    tips (e, item) {
+        if (e.target.nodeName !== 'A') {
+            if (item.license) {
+                this.$msg.error('由于版权保护，您所在的地区暂时无法使用。')
+            }
+
+           if (item.vip) {
+                this.$msg.error('付费歌曲，请在网易云音乐播放')
+            }
+        }
+    },
+    // 滚动到当前播放音乐的位置
+    scrollCurSong(cur) {
+        const self = this
+        if (self.isScroll) {
+            // 我不会写
+        }
     }
-  }
+  },
+   watch: {
+        curSongInfo: {
+            handler (val, oldVal) {
+                this.scrollCurSong(val)
+            },
+            deep: true
+        },
+        songList () {
+            this.currentPage = 1
+        }
+    },
+    beforeDestroy () {
+        clearTimeout(this.timer)
+    }
+
 }
 </script>
 
@@ -85,30 +260,230 @@ export default {
     border-bottom: 1px solid #EBEEF5;
     font-weight: bold;
     color: #999;
-    .columnIndex {
-        width: 70px;
+}
+.columnIndex {
+    width: 70px;
+    line-height: 50px;
+    padding-left: 10px;
+}
+.columnSong {
+    display: flex;
+    flex: 1.5;
+    padding-right: 10px;
+    overflow: hidden;
+    align-items: center;
+}
+.columnSinger {
+    flex: 2;
+    padding-right: 10px;
+    overflow: hidden;
+}
+.columnAlbum {
+    width: 200px;
+}
+.columnTime {
+    width: 140px;
+    padding-right: 10px;
+    text-align: right;
+}
+.list-scroll {
+    -moz-user-select:none; /*火狐*/
+    -webkit-user-select:none; /*webkit浏览器*/
+    -ms-user-select:none; /*IE10*/
+    -khtml-user-select:none; /*早期浏览器*/
+    user-select:none;
+    overflow-y: hidden;
+}
+.list-main {
+    transition: transform .3s;
+}
+.list-item {
+    display: flex;
+    line-height: 0;
+
+    .iconfont {
+        margin-left: 10px;
+        font-size: 22px;
+        cursor: pointer;
+
+        &:hover {
+            color: @color-theme;
+        }
+    }
+
+    .songlist-index {
+        display: inline-block;
+        width: 24px;
+        text-align: center;
+    }
+
+    .playicon {
+        display: none;
+        margin-left: 0;
+    }
+
+    .songlist-name {
+        a {
+            display: inline-block;
+            max-width: 60%;
+            line-height: 50px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            vertical-align: top;
+        }
+
+        .mini {
+            max-width: 100%;
+        }
+
+        i:hover {
+            color: @color-theme;
+            cursor: pointer;
+        }
+    }
+
+    .songlist-singer, .songlist-album {
+        display: inline-block;
+        max-width: 100%;
         line-height: 50px;
-        padding-left: 10px;
-    }
-    .columnSong {
-        display: flex;
-        flex: 1.5;
-        padding-right: 10px;
         overflow: hidden;
-        align-items: center;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
-    .columnSinger {
-        flex: 2;
-        padding-right: 10px;
+
+    .songlist-time {
+        line-height: 50px;
+    }
+
+    .songlist-oper {
+        display: none;
+        line-height: 50px;
+    }
+
+    &.stripe {
+        background: #FAFAFA;
+    }
+
+    &.active {
+        background: #f0f0f0;
+
+        .songlist-index, .playicon {
+            display: none;
+        }
+
+        .audio-icon {
+            display: flex;
+        }
+
+        &:hover {
+            .playicon {
+                display: block;
+                color: @color-theme;
+            }
+            .audio-icon {
+                display: none;
+            }
+        }
+    }
+
+    &:hover {
+        background: #f0f0f0;
+
+        .songlist-time, .songlist-index {
+            display: none;
+        }
+
+        .songlist-oper, .playicon {
+            display: block;
+        }
+    }
+
+    .icon-vip {
+        font-size: 30px;
+        color: @color-theme;
+    }
+
+    &.disable {
+        color: #ccc;
+
+        a {
+            color: #ccc;
+        }
+
+        .playicon, .songlist-oper {
+            display: none;
+        }
+
+        .songlist-index, .songlist-time {
+            display: block;
+        }
+    }
+
+    &.vip {
+        color: @color-theme;
+
+        a {
+            color: @color-theme;
+        }
+    }
+}
+
+.song-list {
+
+    .songlist-singer {
+        display: inline-block;
+        width: 100px;
+        height: 23px;
         overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
-    .columnAlbum {
-        width: 200px;
+
+    .songlist-name {
+        width: 210px;
+
+        a {
+            display: inline-block;
+            max-width: 185px;
+            height: 23px;
+            margin-right: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        i:hover {
+            color: @color-theme;
+            cursor: pointer;
+        }
     }
-    .columnTime {
-        width: 140px;
-        padding-right: 10px;
-        text-align: right;
+
+    .songlist-album {
+        display: inline-block;
+        width: 95%;
+        height: 23px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
+
+    .songlist-oper {
+        display: none;
+
+        .iconfont {
+            margin-left: 15px;
+            font-size: 22px;
+            cursor: pointer;
+
+            &:hover {
+                color: @color-theme;
+            }
+        }
+    }
+}
+.pagination {
+    padding: 50px 0 0;
+    text-align: center;
 }
 </style>

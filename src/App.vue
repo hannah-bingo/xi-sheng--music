@@ -8,7 +8,7 @@
       <my-footer></my-footer>
       <!-- <my-banner></my-banner> -->
       <el-backtop target=".el-main" :bottom="backBottom">
-        <img src="./assets/img/goTop.png" alt="">
+        <img src="./assets/img/goTop.png" alt="" />
       </el-backtop>
     </el-main>
     <Login v-if="loginDialogVisible"></Login>
@@ -16,34 +16,33 @@
   </el-container>
 </template>
 <script>
-import myHeader from '@/components/common/Header.vue'
-import myFooter from '@/components/common/Footer.vue'
-import PlayBar from '@/components/common/Play-bar.vue'
-import Login from '@/components/common/Login.vue'
-import { mapGetters } from 'vuex'
+import myHeader from "@/components/common/Header.vue";
+import myFooter from "@/components/common/Footer.vue";
+import PlayBar from "@/components/common/Play-bar.vue";
+import Login from "@/components/common/Login.vue";
+import { mapGetters } from "vuex";
 export default {
-  name: 'app',
+  name: "app",
   components: {
     myHeader,
     myFooter,
     Login,
-    PlayBar
+    PlayBar,
   },
-  data () {
+  data() {
     return {
-      backBottom: 80
-    }
+      backBottom: 80,
+    };
   },
   // 监听属性 类似于data概念
   computed: {
-    ...mapGetters(['isLogin', 'userInfo', 'loginDialogVisible']),
-    isShowPlayBar () {
-      return this.$route.path !== '/mv' && this.$route.path !== '/video'
-    }
+    ...mapGetters(["loginDialogVisible"]),
+    isShowPlayBar() {
+      return this.$route.path !== "/mvlist" && this.$route.path !== "/video";
+    },
   },
-  methods: {
-  }
-}
+  methods: {},
+};
 </script>
 
 <style lang="less">
@@ -51,6 +50,6 @@ export default {
   height: 100%;
 }
 .layout {
-  min-height: calc(100vh - 80px - 40px)
+  min-height: calc(100vh - 80px - 40px);
 }
 </style>

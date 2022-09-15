@@ -30,6 +30,9 @@ Vue.use(Container)
     .use(Badge)
     .use(Tooltip)
     .use(Autocomplete)
+    .use(Message)
 
+// export default {
 Vue.prototype.$msg = Message
 Vue.prototype.$msgBox = MessageBox
+    // }

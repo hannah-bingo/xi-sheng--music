@@ -10,11 +10,16 @@ const instance = axios.create({
         二次的请求头里面。查看资料才知
         道跨域请求要想带上cookie，必须要
         在{withCredentials: true} */
-        withCredentials: true,
-        baseURL: 'https://pl-fe.cn/cloud-music-api/'
+        // withCredentials: true,
+        // baseURL: 'https://netease-cloud-music-api-crete722p-hannah-bingo.vercel.app/',
+        // baseURL: 'https://neteasecloudmusicapi-docs.4everland.app',
+        baseURL: 'http://music.cyrilstudio.top/',
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded'
+        }
     })
-    //跨域请求，允许保存cookie
-instance.defaults.withCredentials = true
+    //     //跨域请求，允许保存cookie
+    // instance.defaults.withCredentials = true
     //保存其状态码
 instance.defaults.validateStatus = function() {
     return true

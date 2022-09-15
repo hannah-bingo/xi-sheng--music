@@ -11,8 +11,19 @@ const searchHot = () => { return api.get('/search/hot', {}) }
 const searchHotDetail = () => { return api.get('/search/hot/detail', {}) }
 const searchSuggest = ({ keywords = '' }) => { return api.get(`/search/suggest?keywords=${keywords}`, {}) }
 const searchMatch = ({ keywords = '' }) => { return api.get(`/search/multimatch?keywords=${keywords}`, {}) }
-    // 登录
-const login = ({ phone = '', pwd = '' }) => { return api.get(`/login/cellphone?phone=${phone}&password=${pwd}`, {}) }
+    // 二维码登录
+    // const login = ({ phone = '', pwd = '' }) => { return api.get(`/login/cellphone?phone=${phone}&password=${pwd}`, {}) }
+    // 获取二维码的key值
+    // 二维码key生成接口
+const getKey = ({ timestamp = '' }) => { return api.get(`/login/qr/key?timestamp=${timestamp}`, {}) }
+    // 通过key去获取二维码
+const loginQqr = ({ timestamp = '', qrimg = '', key = '' }) => {
+        return api.get(`/login/qr/create?timestamp=${timestamp}&qrimg=${qrimg}&key=${key}`)
+    }
+    // 二维码检测扫码状态接口
+const qrcheck = ({ key = '', timestamp = '' }) => { return api.get(`/login/qr/check?timestamp=${timestamp}&key=${key}`) }
+    // 获取登录状态
+const loginStatus = ({ timestamp = '', cookie = '' }) => { return api.get(`/login/status?timestamp=${timestamp}&cookie=${cookie}`) }
     // 退出登录
 const logout = () => { return api.get('/logout', {}) }
     // 获取用户详情
@@ -50,7 +61,7 @@ const addPlayList = ({ op = 'add', pid = '', tracks = '' }) => { return api.get(
 
 /* ********* 歌曲 ********* */
 // 歌曲详情 多个id , 隔开
-const songDetail = ({ ids = '', timestamp = 0 }) => { return api.post(`/song/detail?timestamp=${timestamp}`, { ids: ids }) }
+const songDetail = ({ ids = '' }) => { return api.get(`/song/detail?ids=${ ids }`) }
     // 获取音乐URL
 const songUrl = ({ id = '' }) => { return api.get(`/song/url?id=${id}`, {}) }
     // 喜欢歌曲
@@ -160,7 +171,6 @@ export {
     searchSuggest,
     searchMatch,
     cloudsearch,
-    login,
     logout,
     getUserInfo,
     checkSong,
@@ -211,5 +221,9 @@ export {
     listDetail,
     getNewMv,
     topArtists,
-    subArtist
+    subArtist,
+    getKey,
+    loginQqr,
+    qrcheck,
+    loginStatus
 }

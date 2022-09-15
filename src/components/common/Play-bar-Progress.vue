@@ -24,6 +24,7 @@ export default {
     // 点击音频进度条
     point (e) {
       this.setProgressLine(e)
+      // console.log(e);
     },
     move () {
       const self = this
@@ -83,7 +84,6 @@ export default {
         border-radius: 2px;
         background: #eee;
         box-shadow:0 0 4px #efefef inset;
-        
     }
 
     .progress-bg {

@@ -23,7 +23,6 @@ export default {
             ss: (dt.getSeconds() + '').padStart(2, '0')
         }
 
-        // 我看不懂这段代码
         for (const k in opt) {
             const ret = new RegExp('(' + k + ')').exec(fmt)
             if (ret) {
