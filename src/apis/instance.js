@@ -13,7 +13,7 @@ const instance = axios.create({
         // withCredentials: true,
         // baseURL: 'https://netease-cloud-music-api-crete722p-hannah-bingo.vercel.app/',
         // baseURL: 'https://neteasecloudmusicapi-docs.4everland.app',
-        baseURL: 'http://music.cyrilstudio.top/',
+        baseURL: 'http://82.157.247.15:3000',
         headers: {
             'content-type': 'application/x-www-form-urlencoded'
         }

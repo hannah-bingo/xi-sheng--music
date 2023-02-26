@@ -1,8 +1,8 @@
 // 组装模块并导出store的地方
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+// import Vue from 'vue'
+// import VueRouter from 'vue-router'
 
-Vue.use(VueRouter)
+// Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
@@ -10,17 +10,17 @@ const routes = [{
     }, {
         path: '/index',
         name: 'Index',
-        component: resolve => { require(['@/views/index/Index.vue'], resolve) }
+        component:  ()=>import('@/views/index/Index.vue') 
     }, {
         path: '/playlist',
         name: 'Playlist',
-        component: resolve => { require(['@/views/playlist/Detail.vue'], resolve) }
+        component:  ()=>import('@/views/playlist/Detail.vue') 
     },
 
     {
         path: '/artist',
         name: 'Artist',
-        component: resolve => { require(['@/views/artist/Artist.vue'], resolve) },
+        component:  ()=>import('@/views/artist/Artist.vue'),
         children: [{
             path: '/artist/Singer',
             name: 'ArtistSinger',
@@ -30,11 +30,11 @@ const routes = [{
     }, {
         path: '/my',
         name: 'My',
-        component: resolve => { require(['@/views/my/Index.vue'], resolve) }
+        component:  ()=>import('@/views/my/Index.vue') 
     }, {
         path: '/song',
         name: 'song',
-        component: resolve => { require(['@/views/song/Song.vue'], resolve) }
+        component:  ()=>import('@/views/song/Song.vue') 
     }
     // {
     //   path: '/about',
